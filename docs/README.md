@@ -8,6 +8,7 @@ Access credentials from AWS Secrets Manager in your Jenkins jobs.
 ## Contents
 
 - [Caching](caching/index.md)
+- [Multiple Accounts](multiple-accounts/index.md)
 - [Networking](networking/index.md)
 - [Screenshots](screenshots/index.md)
 - Project
@@ -19,8 +20,7 @@ Access credentials from AWS Secrets Manager in your Jenkins jobs.
 
 - Read-only view of Secrets Manager.
 - Credential metadata caching (duration: 5 minutes).
-- Jenkins [Configuration As Code](https://github.com/jenkinsci/configuration-as-code-plugin) support.
-- [Cross-account](http://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html) Secrets Manager support with IAM roles.
+- Cross-account secrets access [EXPERIMENTAL].
  
 ## Setup 
 
@@ -41,6 +41,8 @@ Optional permissions:
 
 - `kms:Decrypt` (if you use a customer-managed KMS key to encrypt the secret)
 
+Note: Additional setup is required to use the plugin with [multiple AWS accounts](multiple-accounts/index.md).
+
 ## Usage
 
 1. **Upload the secret** to Secrets Manager as shown below (see also the [AWS documentation](https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/create-secret.html)).
@@ -57,7 +59,6 @@ A simple text *secret*.
   - `jenkins:credentials:type` = `string`
 
 :white_check_mark: Use this credential type whenever it is practical. It is the simplest and most widely compatible type.
-
 
 #### Example
 
@@ -202,55 +203,56 @@ node {
 
 ### Secret File
 
-A secret file with binary *content* and an optional *filename*.
+ A secret file with binary *content* and an optional *filename*.
 
-- Value: *content*
-- Tags:
-  - `jenkins:credentials:type` = `file`
-  - `jenkins:credentials:filename` = *filename* (optional)
+ - Value: *content*
+ - Tags:
+   - `jenkins:credentials:type` = `file`
+   - `jenkins:credentials:filename` = *filename* (optional)
 
-The credential ID is used as the filename by default. In the rare cases when you need to override this (for example, if the credential ID would be an invalid filename on your filesystem), you can set the `jenkins:credentials:filename` tag.
+ The credential ID is used as the filename by default. In the rare cases when you need to override this (for example, if the credential ID would be an invalid filename on your filesystem), you can set the `jenkins:credentials:filename` tag.
 
-#### Example
+ #### Example
 
-```bash
-echo -n $'\x01\x02\x03' > license.bin
-aws secretsmanager create-secret --name 'license-key' --secret-binary 'fileb://license.bin' --tags 'Key=jenkins:credentials:type,Value=file' --description 'License key'
-```
+ ```bash
+ echo -n $'\x01\x02\x03' > license.bin
+ aws secretsmanager create-secret --name 'license-key' --secret-binary 'fileb://license.bin' --tags 'Key=jenkins:credentials:type,Value=file' --description 'License key'
+ ```
 
-Declarative Pipeline:
+ Declarative Pipeline:
 
-```groovy
-pipeline {
-    environment {
-        LICENSE_KEY_FILE = credentials('license-key')
-    }
-    stages {
-        stage('Example') {
-            echo 'Hello world'
-        }
-    }
-}
-```
+ ```groovy
+ pipeline {
+     environment {
+         LICENSE_KEY_FILE = credentials('license-key')
+     }
+     stages {
+         stage('Example') {
+             echo 'Hello world'
+         }
+     }
+ }
+ ```
 
-Scripted Pipeline:
+ Scripted Pipeline:
 
-```groovy
-node {
-    withCredentials([file(credentialsId: 'license-key', variable: 'LICENSE_KEY_FILE')]) {
-        echo 'Hello world'
-    }
-}
-```
+ ```groovy
+ node {
+     withCredentials([file(credentialsId: 'license-key', variable: 'LICENSE_KEY_FILE')]) {
+         echo 'Hello world'
+     }
+ }
+ ```
 
 ## Configuration
 
-Available settings:
+Settings:
 
 - Filter secrets by tag (key, value)
 - Endpoint Configuration
   - Service Endpoint
   - Signing Region
+- IAM role ARNs for cross-account secrets retrieval
 
 The plugin's default behavior requires **no configuration**.
 
@@ -270,10 +272,13 @@ unclassified:
     filters:
       tag:
         key: product
-        value: roadrunner
+        value: foo
     endpointConfiguration:
       serviceEndpoint: http://localhost:4584
       signingRegion: us-east-1
+    roles:
+    - arn:aws:iam::111111111111:role/foo-role
+    - arn:aws:iam::222222222222:role/bar-role
 ```
 
 ## Bugs

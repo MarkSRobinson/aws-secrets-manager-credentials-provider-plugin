@@ -6,9 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 public class PluginCasCConfigurationTest extends AbstractPluginConfigurationTest {
     @Rule
     public JenkinsRule r = new JenkinsConfiguredWithCodeRule();
@@ -25,6 +22,11 @@ public class PluginCasCConfigurationTest extends AbstractPluginConfigurationTest
 
     @Override
     protected void setTagFilters(String key, String value) {
+        // no-op (configured by annotations)
+    }
+
+    @Override
+    protected void setRoles(String role) {
         // no-op (configured by annotations)
     }
 
@@ -47,5 +49,12 @@ public class PluginCasCConfigurationTest extends AbstractPluginConfigurationTest
     @ConfiguredWithCode("/custom-tag.yml")
     public void shouldCustomiseTagFilter() {
         super.shouldCustomiseTagFilter();
+    }
+
+    @Override
+    @Test
+    @ConfiguredWithCode("/custom-roles.yml")
+    public void shouldCustomiseRoles() {
+        super.shouldCustomiseRoles();
     }
 }

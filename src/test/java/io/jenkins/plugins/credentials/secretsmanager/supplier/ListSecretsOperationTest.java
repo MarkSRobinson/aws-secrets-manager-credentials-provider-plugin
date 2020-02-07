@@ -1,50 +1,13 @@
-package io.jenkins.plugins.credentials.secretsmanager;
+package io.jenkins.plugins.credentials.secretsmanager.supplier;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.ResponseMetadata;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.model.CancelRotateSecretRequest;
-import com.amazonaws.services.secretsmanager.model.CancelRotateSecretResult;
-import com.amazonaws.services.secretsmanager.model.CreateSecretRequest;
-import com.amazonaws.services.secretsmanager.model.CreateSecretResult;
-import com.amazonaws.services.secretsmanager.model.DeleteResourcePolicyRequest;
-import com.amazonaws.services.secretsmanager.model.DeleteResourcePolicyResult;
-import com.amazonaws.services.secretsmanager.model.DeleteSecretRequest;
-import com.amazonaws.services.secretsmanager.model.DeleteSecretResult;
-import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest;
-import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
-import com.amazonaws.services.secretsmanager.model.GetRandomPasswordRequest;
-import com.amazonaws.services.secretsmanager.model.GetRandomPasswordResult;
-import com.amazonaws.services.secretsmanager.model.GetResourcePolicyRequest;
-import com.amazonaws.services.secretsmanager.model.GetResourcePolicyResult;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ListSecretVersionIdsRequest;
-import com.amazonaws.services.secretsmanager.model.ListSecretVersionIdsResult;
-import com.amazonaws.services.secretsmanager.model.ListSecretsRequest;
-import com.amazonaws.services.secretsmanager.model.ListSecretsResult;
-import com.amazonaws.services.secretsmanager.model.PutResourcePolicyRequest;
-import com.amazonaws.services.secretsmanager.model.PutResourcePolicyResult;
-import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.PutSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.RestoreSecretRequest;
-import com.amazonaws.services.secretsmanager.model.RestoreSecretResult;
-import com.amazonaws.services.secretsmanager.model.RotateSecretRequest;
-import com.amazonaws.services.secretsmanager.model.RotateSecretResult;
-import com.amazonaws.services.secretsmanager.model.SecretListEntry;
-import com.amazonaws.services.secretsmanager.model.Tag;
-import com.amazonaws.services.secretsmanager.model.TagResourceRequest;
-import com.amazonaws.services.secretsmanager.model.TagResourceResult;
-import com.amazonaws.services.secretsmanager.model.UntagResourceRequest;
-import com.amazonaws.services.secretsmanager.model.UntagResourceResult;
-import com.amazonaws.services.secretsmanager.model.UpdateSecretRequest;
-import com.amazonaws.services.secretsmanager.model.UpdateSecretResult;
-import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
-import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageResult;
-
+import com.amazonaws.services.secretsmanager.model.*;
+import io.jenkins.plugins.credentials.secretsmanager.supplier.ListSecretsOperation;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +18,7 @@ public class ListSecretsOperationTest {
         final ListSecretsResult result = new ListSecretsResult().withSecretList();
         final ListSecretsOperation strategy = new ListSecretsOperation(new MockAwsSecretsManager(result));
 
-        final List<SecretListEntry> secrets = strategy.get();
+        final Collection<SecretListEntry> secrets = strategy.get();
 
         assertThat(secrets).isEmpty();
     }
@@ -65,7 +28,7 @@ public class ListSecretsOperationTest {
         final ListSecretsResult result = new ListSecretsResult().withSecretList(new SecretListEntry().withName("foo").withDescription("bar"));
         final ListSecretsOperation strategy = new ListSecretsOperation(new MockAwsSecretsManager(result));
 
-        final List<SecretListEntry> secrets = strategy.get();
+        final Collection<SecretListEntry> secrets = strategy.get();
 
         assertThat(secrets).containsExactly(new SecretListEntry().withDescription("bar").withName("foo"));
     }
@@ -75,7 +38,7 @@ public class ListSecretsOperationTest {
         final ListSecretsResult result = new ListSecretsResult().withSecretList(new SecretListEntry().withName("foo").withDescription("bar").withTags(new Tag().withKey("key").withValue("value")));
         final ListSecretsOperation strategy = new ListSecretsOperation(new MockAwsSecretsManager(result));
 
-        final List<SecretListEntry> secrets = strategy.get();
+        final Collection<SecretListEntry> secrets = strategy.get();
 
         assertThat(secrets).containsExactly(new SecretListEntry().withDescription("bar").withName("foo").withTags(new Tag().withKey("key").withValue("value")));
     }
