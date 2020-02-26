@@ -1,31 +1,38 @@
 package io.jenkins.plugins.credentials.secretsmanager;
 
-import hudson.util.Secret;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.credentials.secretsmanager.util.CreateSecretOperation;
+import org.assertj.core.api.Assertions;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class RolesIT extends AbstractPluginIT {
-    @Test
-    @ConfiguredWithCode(value = "/roles.yml")
+    @Ignore("Moto does not support cross-account operations")
     public void shouldFetchCredentialsFromMultipleAccounts() {
+        Assertions.fail("Implement this test");
+    }
+
+    @Ignore("Moto does not support cross-account operations")
+    public void shouldThrowExceptionWhenDuplicateSecretNamesPresent() {
+        Assertions.fail("Implement this test");
+    }
+
+    @Test
+    @ConfiguredWithCode(value = "/invalid-roles.yml")
+    public void shouldFailWhenRoleNotValid() {
         // Given
         final CreateSecretOperation.Result foo = createStringSecret("supersecret");
-        // FIXME put this in another account
-        final CreateSecretOperation.Result bar = createOtherStringSecret("supersecret");
 
         // When
         final List<StringCredentials> credentials = lookupCredentials(StringCredentials.class);
 
         // Then
         assertThat(credentials)
-                .extracting("id", "secret")
-                .containsOnly(tuple(foo.getName(), Secret.fromString("supersecret")));
+                .isEmpty();
     }
 }

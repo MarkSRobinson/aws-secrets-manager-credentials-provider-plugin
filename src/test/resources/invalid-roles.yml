@@ -6,4 +6,4 @@ unclassified:
       serviceEndpoint: http://localhost:4584
       signingRegion: us-east-1
     roles:
-    - arn:aws:iam::123456789012:role/marketingadminrole
+    - arn:rol/malformatted
