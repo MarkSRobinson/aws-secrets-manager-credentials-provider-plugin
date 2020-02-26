@@ -41,7 +41,7 @@ Optional permissions:
 
 - `kms:Decrypt` (if you use a customer-managed KMS key to encrypt the secret)
 
-Note: Additional IAM setup is required for [cross-account secrets access](cross-account/index.md).
+Note: Additional setup is required for [cross-account secrets access](cross-account/index.md).
 
 ## Usage
 
